@@ -8,7 +8,7 @@ group = parent?.group!!
 version = parent?.version!!
 
 dependencies {
-    implementation("io.grpc:grpc-kotlin-stub:1.3.0")
+    implementation("io.grpc:grpc-kotlin-stub:1.4.1")
     implementation("io.grpc:grpc-protobuf:1.57.1")
     implementation("com.google.protobuf:protobuf-kotlin:3.23.4")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.1")
