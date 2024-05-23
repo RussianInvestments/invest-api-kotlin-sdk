@@ -17,7 +17,7 @@ dependencies {
 sourceSets {
     main {
         proto {
-            srcDir("src/main/proto")
+            srcDir("../investAPI/src/docs/contracts")
         }
     }
 }

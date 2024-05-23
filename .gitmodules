@@ -1,0 +1,6 @@
+[submodule "kotlin-sdk-grpc-contract/investAPI"]
+	path = kotlin-sdk-grpc-contract/investAPI
+	url = https://github.com/RussianInvestments/investAPI
+[submodule "investAPI"]
+	path = investAPI
+	url = https://github.com/RussianInvestments/investAPI

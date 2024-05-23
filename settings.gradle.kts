@@ -6,5 +6,6 @@ pluginManagement {
     
 }
 rootProject.name = "kotlin-sdk"
-include("kotlin-sdk-grpc-contract", "kotlin-sdk-grpc-core")
+include("kotlin-sdk-grpc-contract")
+include("kotlin-sdk-grpc-core")
 include("kotlin-sdk-grpc-example")
