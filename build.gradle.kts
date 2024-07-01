@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.0" apply false
 }
 
-group = "ru.tinkoff.piapi"
+group = "ru.tinvest.piapi.kotlin"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -19,8 +19,10 @@ subprojects {
     val testImplementation by configurations
     val testRuntimeOnly by configurations
     val implementation by configurations
+
     dependencies {
         testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.2")
+        testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.2")
         testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
         implementation("io.grpc:grpc-kotlin-stub:1.3.0")
         implementation("io.grpc:grpc-protobuf:1.57.1")

@@ -1,4 +1,4 @@
-package ru.tinkoff.piapi.example
+package ru.tinvest.piapi.example
 
 import io.grpc.ManagedChannel
 import kotlinx.coroutines.async
@@ -19,7 +19,7 @@ import ru.tinkoff.piapi.contract.v1.SubscribeCandlesRequest
 import ru.tinkoff.piapi.contract.v1.SubscribeOrderBookRequest
 import ru.tinkoff.piapi.contract.v1.SubscriptionAction
 import ru.tinkoff.piapi.contract.v1.SubscriptionInterval
-import ru.tinkoff.piapi.core.InvestApi
+import ru.tinvest.piapi.core.InvestApi
 import java.util.stream.Collectors
 
 class MarketDataStreamServiceExampleTest {
@@ -46,7 +46,7 @@ class MarketDataStreamServiceExampleTest {
     @DisplayName("Работа с server-side stream")
     fun marketDataServerSideStream() {
         val investApi = InvestApi.createApi(channel)
-        val marketDataStreamService = investApi.marketDataStreamService
+        val marketDataStreamService = investApi.marketDataStreamServiceAsync
         val orderBookInstruments = System.getProperty("instrumentIds").split(",")
             .stream().map { OrderBookInstrument.newBuilder().setInstrumentId(it).setDepth(1).build() }
             .collect(Collectors.toList())
@@ -79,7 +79,7 @@ class MarketDataStreamServiceExampleTest {
     @DisplayName("Работа с двунаправленным стримом")
     fun marketDataStream() {
         val investApi = InvestApi.createApi(channel)
-        val marketDataStreamService = investApi.marketDataStreamService
+        val marketDataStreamService = investApi.marketDataStreamServiceAsync
 
         // Примечание: replay = 1 - число сообщений, которые должны быть повторно отправлены серверу при установке соединения.
         // При значении 0 возможна потеря ранее отправленных сообщений

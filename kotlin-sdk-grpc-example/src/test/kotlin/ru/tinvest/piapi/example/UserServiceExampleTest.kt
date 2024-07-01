@@ -1,4 +1,4 @@
-package ru.tinkoff.piapi.example
+package ru.tinvest.piapi.example
 
 import io.grpc.StatusException
 import kotlinx.coroutines.async
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import ru.tinkoff.piapi.contract.v1.GetAccountsRequest
-import ru.tinkoff.piapi.core.InvestApi
+import ru.tinvest.piapi.core.InvestApi
 
 class UserServiceExampleTest {
     companion object {
@@ -17,7 +17,7 @@ class UserServiceExampleTest {
     }
 
     @Test
-    @DisplayName("Асинхронное обращение к user service")
+    @DisplayName("Обращение к user service c помощью асинхронного метода")
     fun testUserInfo() {
         //создаем channel со свойствами по умолчанию
         val channel = InvestApi.defaultChannel(
@@ -26,7 +26,7 @@ class UserServiceExampleTest {
         )
         //создаем объект API
         val investApi = InvestApi.createApi(channel)
-        val usersService = investApi.usersService
+        val usersService = investApi.usersServiceAsync
         Assertions.assertDoesNotThrow {
             // запрашиваем и выводим все аккаунты в консоль
             runBlocking {
@@ -47,10 +47,10 @@ class UserServiceExampleTest {
         )
         //создаем объект API
         val investApi = InvestApi.createApi(channel)
-        val usersService = investApi.usersService
+        val usersService = investApi.usersServiceSync
         Assertions.assertDoesNotThrow {
             // запрашиваем все аккаунты
-            val accounts = usersService.getAccountsSync(GetAccountsRequest.getDefaultInstance())
+            val accounts = usersService.getAccounts(GetAccountsRequest.getDefaultInstance())
             // выводим полученный результат в output
             accounts.accountsList.forEach { logger.info("$it") }
         }
@@ -59,7 +59,7 @@ class UserServiceExampleTest {
 
     @Test
     @DisplayName("Получение ошибки unauthenticated")
-    fun testAuthenticated() {
+    fun testUnauthenticated() {
         //создаем channel с некорректным токеном
         val channel = InvestApi.defaultChannel(
             token = "invalid_token",
@@ -67,11 +67,11 @@ class UserServiceExampleTest {
         )
         //создаем объект API
         val investApi = InvestApi.createApi(channel)
-        val usersService = investApi.usersService
+        val usersService = investApi.usersServiceSync
         // запрашиваем аккаунты для получения ошибки
         Assertions.assertThrows(StatusException::class.java)
         {
-            usersService.getAccountsSync(GetAccountsRequest.getDefaultInstance())
+            usersService.getAccounts(GetAccountsRequest.getDefaultInstance())
         }
         channel.shutdown()
     }
