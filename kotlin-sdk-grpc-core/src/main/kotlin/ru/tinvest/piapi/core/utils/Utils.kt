@@ -10,6 +10,10 @@ import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 
+/**
+ * Converts [Timestamp] to [Instant]
+ * @return [Instant] representation of [Timestamp]
+ */
 fun Timestamp.toInstant(): Instant = Instant.ofEpochSecond(this.seconds, this.nanos.toLong())
 fun Timestamp.toOffsetDateTime(zone: ZoneOffset): OffsetDateTime = this.toInstant().atOffset(zone)
 fun MoneyValue.toBigDecimal(): BigDecimal = valueOfQuotation(this.units, this.nano)

@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "1.9.0" apply false
+    id("org.jetbrains.dokka") version "1.9.20"
 }
 
 group = "ru.tinvest.piapi.kotlin"
@@ -11,6 +12,8 @@ repositories {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "maven-publish")
+    apply(plugin = "org.jetbrains.dokka")
 
     repositories {
         mavenCentral()
@@ -41,4 +44,16 @@ subprojects {
     tasks.getByName<Test>("test") {
         useJUnitPlatform()
     }
+
+/*    tasks.register<Jar>("dokkaJavadocJar") {
+        mustRunAfter(tasks.dokkaJavadoc)
+        dependsOn(tasks.dokkaJavadoc)
+        from(tasks.dokkaJavadoc.flatMap { it.outputDirectory })
+        archiveClassifier.set("javadoc")
+    }*/
+
+//    tasks.named("dokkaJavadoc") {
+//        dependsOn(tasks.withType<JavaCompile>())
+//        mustRunAfter(tasks.withType<JavaCompile>())
+//    }
 }

@@ -281,6 +281,7 @@ private fun generateCompanionObject(packageName: String): TypeSpec {
             FunSpec.builder("createApi").returns(ClassName(packageName, "InvestApi"))
                 .addParameter("channel", Channel::class.asTypeName())
                 .addCode("return InvestApi(channel)")
+                .addKdoc("Creates InvestApi instance from channel")
                 .build()
         )
         .addFunction(

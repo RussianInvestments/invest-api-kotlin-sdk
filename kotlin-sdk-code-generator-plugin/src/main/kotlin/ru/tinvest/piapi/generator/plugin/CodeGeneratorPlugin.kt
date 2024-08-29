@@ -40,7 +40,7 @@ class CodeGeneratorPlugin : Plugin<Project> {
         target.afterEvaluate {
             (target.extensions["sourceSets"] as SourceSetContainer)["main"]
                 .java
-                .srcDir(extension.outputPath)
+                .srcDir(extension.outputPath.asFile)
         }
     }
 }
