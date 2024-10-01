@@ -34,20 +34,21 @@ tasks.named<AbstractArchiveTask>("kotlinSourcesJar").configure {
     archiveExtension.set("jar")
 }
 
+java {
+    withSourcesJar()
+}
+
 tasks.withType<Jar> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-tasks.register("sourcesJar", Jar::class) {
-    from(sourceSets.main.get().allSource)
-    archiveClassifier.set("sources")
-    archiveExtension.set("jar")
-}
 
 tasks.named<Jar>("sourcesJar") {
     from(tasks.getByName("genHelpersClasses"))
     mustRunAfter(tasks.getByName("genHelpersClasses"))
     dependsOn(tasks.getByName("genHelpersClasses"))
+    archiveClassifier.set("sources")
+    archiveExtension.set("jar")
 }
 
 tasks.named<DokkaTask>("dokkaJavadoc").configure {
@@ -61,13 +62,20 @@ tasks.named<DokkaTask>("dokkaJavadoc").configure {
         }
     }
     dependsOn(tasks.named("compileJava"))
+}
 
+tasks.create<Jar>("dokkaJavadocJar") {
+    dependsOn(tasks.dokkaJavadoc)
+    from(tasks.dokkaJavadoc.flatMap { it.outputDirectory })
+    archiveClassifier.set("javadoc")
+}
+
+tasks.withType<AbstractPublishToMaven> {
+    dependsOn("dokkaJavadocJar")
+    dependsOn("sourcesJar")
 }
 
 publishing {
-    afterEvaluate {
-        signing.sign(publishing.publications[project.name])
-    }
     repositories {
         maven {
             name = "OSSRH"
@@ -81,6 +89,8 @@ publishing {
     publications {
         create<MavenPublication>(project.name) {
             from(components["java"])
+            artifact(tasks.getByName("dokkaJavadocJar"))
+            the<SigningExtension>().sign(this)
             pom {
                 name.set(project.name)
                 description.set("Kotlin SDK for T-Invest API")

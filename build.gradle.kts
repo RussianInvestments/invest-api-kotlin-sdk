@@ -44,16 +44,4 @@ subprojects {
     tasks.getByName<Test>("test") {
         useJUnitPlatform()
     }
-
-/*    tasks.register<Jar>("dokkaJavadocJar") {
-        mustRunAfter(tasks.dokkaJavadoc)
-        dependsOn(tasks.dokkaJavadoc)
-        from(tasks.dokkaJavadoc.flatMap { it.outputDirectory })
-        archiveClassifier.set("javadoc")
-    }*/
-
-//    tasks.named("dokkaJavadoc") {
-//        dependsOn(tasks.withType<JavaCompile>())
-//        mustRunAfter(tasks.withType<JavaCompile>())
-//    }
 }

@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     id("java-library")
     id("maven-publish")
+    signing
 }
 
 dependencies {
@@ -34,6 +35,17 @@ tasks.named("dokkaJavadoc") {
     mustRunAfter(tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>())
 }
 
+tasks.create<Jar>("dokkaJavadocJar") {
+    dependsOn(tasks.dokkaJavadoc)
+    from(tasks.dokkaJavadoc.flatMap { it.outputDirectory })
+    archiveClassifier.set("javadoc")
+}
+
+tasks.withType<AbstractPublishToMaven> {
+    dependsOn("dokkaJavadocJar")
+    dependsOn("sourcesJar")
+}
+
 publishing {
     repositories {
         maven {
@@ -48,6 +60,8 @@ publishing {
     publications {
         create<MavenPublication>(project.name) {
             from(components["java"])
+            artifact(tasks.getByName("dokkaJavadocJar"))
+            the<SigningExtension>().sign(this)
             pom {
                 name.set(project.name)
                 description.set("Kotlin SDK examples library for T-Invest API")
