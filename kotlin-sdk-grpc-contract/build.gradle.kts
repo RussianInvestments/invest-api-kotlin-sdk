@@ -1,4 +1,5 @@
 import com.google.protobuf.gradle.id
+import java.net.URI
 
 plugins {
     id("com.google.protobuf") version "0.9.4"
@@ -78,11 +79,12 @@ publishing {
     repositories {
         maven {
             name = "OSSRH"
-            url = uri(project.properties["maven.publish.url"]!!)
+            url = URI(findProperty("maven.publish.url").toString())
             credentials {
-                username = if (System.getenv("MAVEN_USERNAME").isNullOrEmpty()) project.properties["ossh.username"].toString() else System.getenv("MAVEN_USERNAME")
-                password = if (System.getenv("MAVEN_PASSWORD").isNullOrEmpty()) project.properties["ossh.password"].toString() else System.getenv("MAVEN_PASSWORD")
+                username = findProperty("ossh.username").toString()
+                password = findProperty("ossh.password").toString()
             }
+
         }
     }
     publications {
@@ -109,6 +111,13 @@ publishing {
                         name.set("Sergey Nemets")
                     }
                 }
+
+                scm {
+                    connection.set("scm:git:git://github.com/RussianInvestments/invest-api-kotlin-sdk.git")
+                    developerConnection.set("scm:git:ssh://github.com/RussianInvestments/invest-api-kotlin-sdk.git")
+                    url.set("https://github.com/RussianInvestments/invest-api-kotlin-sdk")
+                }
+
             }
         }
     }

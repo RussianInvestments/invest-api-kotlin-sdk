@@ -1,4 +1,5 @@
 import java.util.Properties
+import java.net.URI
 
 plugins {
     id("java-library")
@@ -50,10 +51,10 @@ publishing {
     repositories {
         maven {
             name = "OSSRH"
-            url = uri(project.properties["maven.publish.url"]!!)
+            url = URI(findProperty("maven.publish.url").toString())
             credentials {
-                username = System.getenv("MAVEN_USERNAME")
-                password = System.getenv("MAVEN_PASSWORD")
+                username = findProperty("ossh.username").toString()
+                password = findProperty("ossh.password").toString()
             }
         }
     }
@@ -79,6 +80,12 @@ publishing {
                         id.set("NemetsSY-TCS")
                         name.set("Sergey Nemets")
                     }
+                }
+
+                scm {
+                    connection.set("scm:git:git://github.com/RussianInvestments/invest-api-kotlin-sdk.git")
+                    developerConnection.set("scm:git:ssh://github.com/RussianInvestments/invest-api-kotlin-sdk.git")
+                    url.set("https://github.com/RussianInvestments/invest-api-kotlin-sdk")
                 }
             }
         }

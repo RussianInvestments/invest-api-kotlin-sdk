@@ -3,8 +3,8 @@ plugins {
     id("org.jetbrains.dokka") version "1.9.20"
 }
 
-group = "ru.tinvest.piapi.kotlin"
-version = "1.0-SNAPSHOT"
+group = "ru.tinkoff.invest.piapi.kotlin"
+version = "1.24.0"
 
 repositories {
     mavenCentral()
