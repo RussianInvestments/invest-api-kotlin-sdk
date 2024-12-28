@@ -1,9 +1,9 @@
 package ru.tinvest.piapi.example
 
-import com.google.protobuf.Timestamp
 import ru.tinkoff.piapi.contract.v1.GetTechAnalysisRequest
 import ru.tinkoff.piapi.contract.v1.Quotation
 import ru.tinvest.piapi.core.InvestApi
+import ru.tinvest.piapi.core.utils.toTimestamp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -19,15 +19,11 @@ class TechAnalysisAsyncExample {
         // Тип цены для расчета индикатора
         private val TYPE_OF_PRICE = GetTechAnalysisRequest.TypeOfPrice.TYPE_OF_PRICE_CLOSE
 
-        // Время начало периода берем на час раньше текущего
-        private val timeFrom = Timestamp.newBuilder()
-            .setSeconds(Instant.now().minus(1, ChronoUnit.HOURS).epochSecond)
-            .build()
+        // Время начала периода берем на час раньше текущего
+        private val timeFrom = Instant.now().minus(1, ChronoUnit.HOURS).toTimestamp()
 
         // Время окончания периода берем как текущее
-        private val timeTo = Timestamp.newBuilder()
-            .setSeconds(Instant.now().epochSecond)
-            .build()
+        private val timeTo = Instant.now().toTimestamp()
     }
 
     suspend fun exampleTechAnalysisRSI() {
