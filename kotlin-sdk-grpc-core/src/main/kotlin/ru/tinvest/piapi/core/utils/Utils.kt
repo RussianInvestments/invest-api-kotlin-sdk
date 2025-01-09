@@ -15,7 +15,7 @@ import java.time.ZoneOffset
  * @return [Instant] representation of [Timestamp]
  */
 fun Timestamp.toInstant(): Instant = Instant.ofEpochSecond(this.seconds, this.nanos.toLong())
-fun Instant.toTimestamp(): Timestamp = Timestamp.newBuilder().setSeconds(this.epochSecond).build()
+fun Instant.toTimestamp(): Timestamp = Timestamp.newBuilder().setSeconds(this.epochSecond).setNanos(this.nano).build()
 fun Timestamp.toOffsetDateTime(zone: ZoneOffset): OffsetDateTime = this.toInstant().atOffset(zone)
 fun MoneyValue.toBigDecimal(): BigDecimal = valueOfQuotation(this.units, this.nano)
 fun MoneyValue.toQuotation(): Quotation = Quotation.newBuilder().setUnits(units).setNano(nano).build()
