@@ -2,7 +2,7 @@ import org.jetbrains.dokka.gradle.DokkaTask
 import java.net.URI
 
 plugins {
-    id("ru.tinvest.piapi.helpers-codegen-plugin")
+    id("ru.ttech.piapi.helpers-codegen-plugin")
     id("java-library")
     id("maven-publish")
     signing
@@ -23,7 +23,7 @@ version = parent?.version!!
 
 helpersCodegen {
     packageName = "ru.tinkoff.piapi.contract.v1"
-    generatedPackageName = "ru.tinvest.piapi.core"
+    generatedPackageName = "ru.ttech.piapi.core"
 }
 
 tasks.named<AbstractArchiveTask>("kotlinSourcesJar").configure {
