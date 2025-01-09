@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "ru.tinkoff.invest.piapi.kotlin"
-version = "1.24.0"
+version = "1.27.0"
 
 repositories {
     mavenCentral()
