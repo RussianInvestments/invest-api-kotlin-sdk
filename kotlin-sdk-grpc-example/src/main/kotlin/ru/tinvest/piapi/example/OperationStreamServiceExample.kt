@@ -4,12 +4,18 @@ import io.grpc.ManagedChannel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import ru.tinkoff.piapi.contract.v1.GetAccountsRequest
 import ru.tinkoff.piapi.contract.v1.PortfolioStreamRequest
 import ru.tinkoff.piapi.contract.v1.PositionsStreamRequest
 import ru.tinvest.piapi.core.InvestApi
 
 class OperationStreamServiceExample {
+
+    companion object {
+        private val logger: Logger = LoggerFactory.getLogger(OperationStreamServiceExample::class.java)
+    }
 
     fun examplePortfolioStream(channel: ManagedChannel) {
         val investApi = InvestApi.createApi(channel)
@@ -28,8 +34,8 @@ class OperationStreamServiceExample {
                     // Две callback функции (количество не ограничено), для обработки сообщений.
                     // Первая выводит в консоль сообщение о получении сообщения типа PortfolioStreamResponse
                     // Вторая функция выводит в консоль полученное сообщение вне зависимости от типа
-                    { if (it.hasSubscriptions()) println("Состояние подписки обновилось: ${it.subscriptions}") },
-                    { message -> println("Получено обновление: $message") }
+                    { if (it.hasSubscriptions()) logger.info("Состояние подписки обновилось: ${it.subscriptions}") },
+                    { message -> logger.info("Получено обновление: $message") }
                 )
             }
             //через 3 секунды закрываем соединение
@@ -55,8 +61,8 @@ class OperationStreamServiceExample {
                     // Две callback функции (количество не ограничено), для обработки сообщений.
                     // Первая выводит в консоль сообщение о получении сообщения типа PositionsStreamResponse
                     // Вторая функция выводит в консоль полученное сообщение вне зависимости от типа
-                    { if (it.hasSubscriptions()) println("Состояние подписки обновилось: ${it.subscriptions}") },
-                    { message -> println("Получено обновление: $message") }
+                    { if (it.hasSubscriptions()) logger.info("Состояние подписки обновилось: ${it.subscriptions}") },
+                    { message -> logger.info("Получено обновление: $message") }
                 )
             }
             //через 3 секунды закрываем соединение

@@ -1,8 +1,11 @@
 package ru.tinvest.piapi.example
 
 import io.grpc.ManagedChannel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import ru.tinkoff.piapi.contract.v1.*
 import ru.tinvest.piapi.core.InvestApi
+import ru.tinvest.piapi.core.OperationsServiceSync
 import ru.tinvest.piapi.core.utils.toBigDecimal
 import ru.tinvest.piapi.core.utils.toTimestamp
 import java.time.Instant
@@ -12,8 +15,11 @@ import java.time.temporal.ChronoUnit
 class OperationsServiceSyncExample {
 
     companion object {
+        private val logger: Logger = LoggerFactory.getLogger(OperationsServiceSyncExample::class.java)
+
         // начало периода
         private val timeFrom = Instant.now().minus(1, ChronoUnit.DAYS).toTimestamp()
+
         // окончание периода
         private val timeTo = Instant.now().toTimestamp()
     }
@@ -48,7 +54,7 @@ class OperationsServiceSyncExample {
                     .build()
             )
             if (response.hasGenerateBrokerReportResponse()) {
-                println("Task id: ${response.generateBrokerReportResponse.taskId}")
+                logger.info("Task id: ${response.generateBrokerReportResponse.taskId}")
 
                 // Также можно запросить готовый отчет по его id
                 val report = operationsService.getBrokerReport(
@@ -63,7 +69,7 @@ class OperationsServiceSyncExample {
                 )
 
                 if (report.hasGetBrokerReportResponse()) {
-                    println(
+                    logger.info(
                         "Отчет по задаче ${response.generateBrokerReportResponse.taskId} " +
                                 "содержит ${report.getBrokerReportResponse.itemsCount} элементов"
                     )
@@ -71,7 +77,7 @@ class OperationsServiceSyncExample {
             }
 
             if (response.hasGetBrokerReportResponse()) {
-                println("Отчет содержит ${response.getBrokerReportResponse.itemsCount} элементов")
+                logger.info("Отчет содержит ${response.getBrokerReportResponse.itemsCount} элементов")
             }
         }
         channel.shutdown()
@@ -91,15 +97,15 @@ class OperationsServiceSyncExample {
                     .build()
             )
 
-            println("Общая стоимость облигаций в портфеле ${response.totalAmountBonds}")
-            println("Общая стоимость фондов в портфеле ${response.totalAmountEtf}")
-            println("Общая стоимость валют в портфеле ${response.totalAmountCurrencies}")
-            println("Общая стоимость фьючерсов в портфеле ${response.totalAmountFutures}")
-            println("Общая стоимость акций в портфеле ${response.totalAmountShares}")
-            println("Текущая доходность портфеля ${response.expectedYield}")
-            println("В портфеле ${response.positionsCount} позиций")
+            logger.info("Общая стоимость облигаций в портфеле ${response.totalAmountBonds}")
+            logger.info("Общая стоимость фондов в портфеле ${response.totalAmountEtf}")
+            logger.info("Общая стоимость валют в портфеле ${response.totalAmountCurrencies}")
+            logger.info("Общая стоимость фьючерсов в портфеле ${response.totalAmountFutures}")
+            logger.info("Общая стоимость акций в портфеле ${response.totalAmountShares}")
+            logger.info("Текущая доходность портфеля ${response.expectedYield}")
+            logger.info("В портфеле ${response.positionsCount} позиций")
             response.positionsList.take(5).forEach { position ->
-                println(
+                logger.info(
                     "Позиция с figi: ${position.figi}, количество инструмента: ${position.quantity.toBigDecimal()}, " +
                             "текущая цена инструмента: ${position.currentPrice.toBigDecimal()}, " +
                             "текущая расчитанная доходность: ${position.expectedYield.toBigDecimal()}"
@@ -122,13 +128,13 @@ class OperationsServiceSyncExample {
                     .setAccountId(it.id)  // идентификатор счета клиента
                     .setFrom(timeFrom) // начало периода
                     .setTo(timeTo) // окончание периода
-                    .setState(OperationState.OPERATION_STATE_UNSPECIFIED) // фильтр по статусу операции
+                    .setState(OperationState.OPERATION_STATE_CANCELED) // фильтр по статусу операции
                     .setFigi("BBG0013HGFT4") // figi Доллара США
                     .build()
             )
 
             response.operationsList.take(5).forEach { operation ->
-                println(
+                logger.info(
                     "Операция с id: ${operation.id}, дата: ${operation.state}, статус: ${operation.state}," +
                             " платёж: ${operation.payment}, figi: ${operation.figi}"
                 )
@@ -151,21 +157,21 @@ class OperationsServiceSyncExample {
                     .build()
             )
 
-            println("Список валютных позиций портфеля")
+            logger.info("Список валютных позиций портфеля")
             response.moneyList.forEach { money ->
-                println("Валюта: ${money.currency}, количество: ${money.toBigDecimal()}")
+                logger.info("Валюта: ${money.currency}, количество: ${money.toBigDecimal()}")
             }
-            println("Список заблокированных валютных позиций портфеля")
+            logger.info("Список заблокированных валютных позиций портфеля")
             response.blockedList.forEach { money ->
-                println("Валюта: ${money.currency}, количество: ${money.toBigDecimal()}")
+                logger.info("Валюта: ${money.currency}, количество: ${money.toBigDecimal()}")
             }
-            println("Список ценно-бумажных позиций портфеля")
+            logger.info("Список ценно-бумажных позиций портфеля")
             response.securitiesList.forEach { security ->
-                println("figi: ${security.figi}, текущий баланс: ${security.balance}, заблокировано: ${security.blocked}")
+                logger.info("figi: ${security.figi}, текущий баланс: ${security.balance}, заблокировано: ${security.blocked}")
             }
-            println("Список фьючерсов портфеля")
+            logger.info("Список фьючерсов портфеля")
             response.futuresList.forEach { future ->
-                println("figi: ${future.figi}, текущий баланс: ${future.balance}, заблокировано: ${future.blocked}")
+                logger.info("figi: ${future.figi}, текущий баланс: ${future.balance}, заблокировано: ${future.blocked}")
             }
         }
         channel.shutdown()
@@ -185,18 +191,18 @@ class OperationsServiceSyncExample {
                     .build()
             )
 
-            println("Доступный для вывода остаток для счета $it")
-            println("Массив валютных позиций")
+            logger.info("Доступный для вывода остаток для счета $it")
+            logger.info("Массив валютных позиций")
             response.moneyList.forEach { money ->
-                println("Валюта ${money.currency}, количество: ${money.toBigDecimal()}")
+                logger.info("Валюта ${money.currency}, количество: ${money.toBigDecimal()}")
             }
-            println("Массив заблокированных валютных позиций портфеля")
+            logger.info("Массив заблокированных валютных позиций портфеля")
             response.moneyList.forEach { money ->
-                println("Валюта ${money.currency}, количество: ${money.toBigDecimal()}")
+                logger.info("Валюта ${money.currency}, количество: ${money.toBigDecimal()}")
             }
-            println("Заблокировано под гарантийное обеспечение фьючерсов")
+            logger.info("Заблокировано под гарантийное обеспечение фьючерсов")
             response.blockedGuaranteeList.forEach { money ->
-                println("Валюта ${money.currency}, количество: ${money.toBigDecimal()}")
+                logger.info("Валюта ${money.currency}, количество: ${money.toBigDecimal()}")
             }
         }
         channel.shutdown()
@@ -223,7 +229,7 @@ class OperationsServiceSyncExample {
             )
 
             if (response.hasGenerateDivForeignIssuerReportResponse()) {
-                println("Task id: ${response.generateDivForeignIssuerReportResponse.taskId}")
+                logger.info("Task id: ${response.generateDivForeignIssuerReportResponse.taskId}")
 
                 // Также можно запросить готовый отчет по его id
                 val report = operationsService.getDividendsForeignIssuer(
@@ -237,10 +243,10 @@ class OperationsServiceSyncExample {
                 )
 
                 if (report.hasDivForeignIssuerReport()) {
-                    println("Отчет содержит в себе ${response.divForeignIssuerReport.itemsCount} позиций")
+                    logger.info("Отчет содержит в себе ${response.divForeignIssuerReport.itemsCount} позиций")
                 }
             } else if (response.hasDivForeignIssuerReport()) {
-                println("Отчет содержит в себе ${response.divForeignIssuerReport.itemsCount} позиций")
+                logger.info("Отчет содержит в себе ${response.divForeignIssuerReport.itemsCount} позиций")
             }
         }
         channel.shutdown()
@@ -253,27 +259,69 @@ class OperationsServiceSyncExample {
 
         // Получаем список аккаунтов и берём первый из списка
         accounts.accountsList.take(1).forEach {
-            println("Получение операций с помощью курсора без фильтрации")
+            logger.info("Получение последних 5 операций с помощью курсора без фильтрации")
+            val totalOperations = getTotalOperationsForAccount(operationsService, it.id)
+            totalOperations.takeLast(5).forEach { operation ->
+                logger.info(
+                    "Операция с id: ${operation.id}, дата: ${operation.date}, статус: ${operation.state}, " +
+                            "платёж: ${operation.payment.toBigDecimal()}, figi: ${operation.figi}"
+                )
+            }
+
+            logger.info("Получение последних 5 операций с помощью курсора с фильтрацией")
+            val totalOperationsWithFilter = getTotalOperationsForAccountWithFilter(operationsService, it.id)
+            totalOperationsWithFilter.take(5).forEach { operation ->
+                logger.info(
+                    "Операция с id: ${operation.id}, дата: ${operation.date}, статус: ${operation.state}, " +
+                            "платёж: ${operation.payment.toBigDecimal()}, figi: ${operation.figi}"
+                )
+            }
+        }
+        channel.shutdown()
+    }
+
+    private fun getTotalOperationsForAccount(
+        operationsService: OperationsServiceSync,
+        accountId: String
+    ): List<OperationItem> {
+        var cursor = "" // Начальное значение курсора
+        val totalOperations = mutableListOf<OperationItem>()
+        // в цикле получаем постранично все операции
+        while (true) {
             // запрос на получение операций по счёту с пагинацией
             val response = operationsService.getOperationsByCursor(
                 GetOperationsByCursorRequest.newBuilder()
-                    .setAccountId(it.id)  // идентификатор счёта клиента
+                    .setAccountId(accountId)  // идентификатор счёта клиента
+                    .setCursor(cursor) // курсор для указания текущей страницы
                     .setFrom(timeFrom) // начало периода
                     .setTo(timeTo) // окончание периода
                     .build()
             )
-            response.itemsList.take(5).forEach { operation ->
-                println("Операция с id: ${operation.id}, дата: ${operation.date}, статус: ${operation.state}, " +
-                        "платёж: ${operation.payment.toBigDecimal()}, figi: ${operation.figi}")
+            totalOperations.addAll(response.itemsList)
+            cursor = response.nextCursor
+            if (!response.hasNext) {
+                break
             }
+        }
+        return totalOperations
+    }
 
-            println("Получение операций с помощью курсора с фильтрацией")
-            val responseWithFilters = operationsService.getOperationsByCursor(
+    private fun getTotalOperationsForAccountWithFilter(
+        operationsService: OperationsServiceSync,
+        accountId: String
+    ): List<OperationItem> {
+        var cursor = "" // Начальное значение курсора
+        val totalOperations = mutableListOf<OperationItem>()
+        // в цикле получаем постранично все операции, удовлетворяющие фильтру
+        while (true) {
+            // запрос на получение операций по счёту с пагинацией и фильтрацией
+            val response = operationsService.getOperationsByCursor(
                 GetOperationsByCursorRequest.newBuilder()
-                    .setAccountId(it.id) // идентификатор счёта клиента
+                    .setAccountId(accountId) // идентификатор счёта клиента
                     .setInstrumentId("BBG0013HGFT4") // figi Доллара США
                     .setFrom(timeFrom) // начало периода
                     .setTo(timeTo) // окончание периода
+                    .setCursor(cursor)
                     .setLimit(200) // лимит количества операций
                     .addOperationTypes(OperationType.OPERATION_TYPE_TAX_CORRECTION) // типы операций
                     .addOperationTypes(OperationType.OPERATION_TYPE_BUY_MARGIN)
@@ -283,12 +331,12 @@ class OperationsServiceSyncExample {
                     .setWithoutOvernights(true) // флаг показа овернайт операций
                     .build()
             )
-            responseWithFilters.itemsList.take(5).forEach { operation ->
-                println("Операция с id: ${operation.id}, дата: ${operation.date}, статус: ${operation.state}, " +
-                        "платёж: ${operation.payment.toBigDecimal()}, figi: ${operation.figi}")
+            totalOperations.addAll(response.itemsList)
+            cursor = response.nextCursor
+            if (!response.hasNext) {
+                break
             }
         }
-
-        channel.shutdown()
+        return totalOperations
     }
 }
