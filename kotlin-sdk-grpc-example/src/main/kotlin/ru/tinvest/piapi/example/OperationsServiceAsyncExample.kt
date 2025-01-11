@@ -103,7 +103,7 @@ class OperationsServiceAsyncExample {
             logger.info("Общая стоимость фьючерсов в портфеле ${response.totalAmountFutures}")
             logger.info("Общая стоимость акций в портфеле ${response.totalAmountShares}")
             logger.info("Текущая доходность портфеля ${response.expectedYield}")
-            logger.info("В портфеле ${response.positionsCount} позиций")
+            logger.info("В портфеле ${response.positionsCount} позиций. Первые 5 позиций:")
             response.positionsList.take(5).forEach { position ->
                 logger.info(
                     "Позиция с figi: ${position.figi}, количество инструмента: ${position.quantity.toBigDecimal()}, " +
@@ -133,6 +133,7 @@ class OperationsServiceAsyncExample {
                     .build()
             )
 
+            logger.info("Первые 5 операций по счету ${it.id}:")
             response.operationsList.take(5).forEach { operation ->
                 logger.info(
                     "Операция с id: ${operation.id}, дата: ${operation.state}, статус: ${operation.state}," +
@@ -270,7 +271,7 @@ class OperationsServiceAsyncExample {
 
             logger.info("Получение последних 5 операций с помощью курсора с фильтрацией")
             val totalOperationsWithFilter = getTotalOperationsForAccountWithFilter(operationsService, it.id)
-            totalOperationsWithFilter.take(5).forEach { operation ->
+            totalOperationsWithFilter.takeLast(5).forEach { operation ->
                 logger.info(
                     "Операция с id: ${operation.id}, дата: ${operation.date}, статус: ${operation.state}, " +
                             "платёж: ${operation.payment.toBigDecimal()}, figi: ${operation.figi}"
@@ -321,7 +322,7 @@ class OperationsServiceAsyncExample {
                     .setInstrumentId("BBG0013HGFT4") // figi Доллара США
                     .setFrom(timeFrom) // начало периода
                     .setTo(timeTo) // окончание периода
-                    .setCursor(cursor)
+                    .setCursor(cursor) // курсор для указания текущей страницы
                     .setLimit(200) // лимит количества операций
                     .addOperationTypes(OperationType.OPERATION_TYPE_TAX_CORRECTION) // типы операций
                     .addOperationTypes(OperationType.OPERATION_TYPE_BUY_MARGIN)
