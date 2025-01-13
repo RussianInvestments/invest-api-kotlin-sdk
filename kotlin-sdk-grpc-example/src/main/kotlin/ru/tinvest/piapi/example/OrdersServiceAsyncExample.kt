@@ -40,6 +40,7 @@ class OrdersServiceAsyncExample {
         val marketService = investApi.marketDataServiceAsync
         val userService = investApi.usersServiceAsync
         val ordersService = investApi.ordersServiceAsync
+        val ordersStreamService = investApi.ordersStreamServiceAsync
 
         // берем первый счет из списка
         val account = getBrokerAccount(userService)
@@ -51,50 +52,62 @@ class OrdersServiceAsyncExample {
         // цена на 10 шагов ниже текущей
         val price = lastPrice.minus(priceStep.multiply(BigDecimal.TEN))
 
-        // выставляем лимитный ордер
-        val postOrder = ordersService.postOrderAsync(
-            PostOrderAsyncRequest.newBuilder()
-                .setAccountId(account.id) // id счета
-                .setInstrumentId(SHARE_UID) // uid инструмента
-                .setDirection(OrderDirection.ORDER_DIRECTION_BUY) // навправление ордера
-                .setQuantity(1) // количество инструмента
-                .setOrderType(OrderType.ORDER_TYPE_LIMIT) // тип ордера
-                .setPrice(price.toQuotation()) // лимитная цена
-                .setOrderId(UUID.randomUUID().toString()) // ключ идемпотентности
-                .build()
-        )
-        logger.info("id ордера: ${postOrder.orderRequestId}")
-
-        val orderStateRequest = GetOrderStateRequest.newBuilder()
-            .setAccountId(account.id) // id аккаунта
-            .setOrderId(postOrder.orderRequestId) // id ордера
-            .setOrderIdType(OrderIdType.ORDER_ID_TYPE_REQUEST) // тип id -- ключ идемпотентности, переданный клиентом
+        // собираем запрос на подписку ордеров пользователя
+        val ordersRequest = OrderStateStreamRequest.newBuilder()
+            .addAccounts(account.id) // id счета
             .build()
-        logger.info("Запрос: $orderStateRequest")
 
-        // получаем ордер
-        val orderState = ordersService.getOrderState(orderStateRequest)
-        logger.info("Ордер: $orderState")
+        val orderId = UUID.randomUUID().toString() // сгенерированный ключ идемпотентности ордера
+        // собираем запрос для создания ордера асинхронно
+        val postOrderRequest = PostOrderAsyncRequest.newBuilder()
+            .setAccountId(account.id) // id счета
+            .setInstrumentId(SHARE_UID) // uid инструмента
+            .setDirection(OrderDirection.ORDER_DIRECTION_BUY) // направление ордера
+            .setQuantity(1) // количество инструмента
+            .setOrderType(OrderType.ORDER_TYPE_LIMIT) // тип ордера
+            .setPrice(price.toQuotation()) // лимитная цена
+            .setOrderId(orderId) // ключ идемпотентности
+            .build()
 
-        val newPrice = price.minus(priceStep.multiply(BigDecimal.TEN))
-        val updatedOrderState = ordersService.replaceOrder(
-            ReplaceOrderRequest.newBuilder()
-                .setIdempotencyKey(UUID.randomUUID().toString()) // ключ идемпотентности
-                .setAccountId(account.id) // id аккаунта
-                .setOrderId(orderState.orderId) // id ордера
-                .setQuantity(2) // количество инструмента
-                .setPrice(newPrice.toQuotation()) // лимитная цена
-                .build()
-        )
-        logger.info("Обновленный ордер: $updatedOrderState")
+        runBlocking {
+            val ordersJob = async {
+                ordersStreamService.orderStateStream(
+                    ordersRequest,
+                    {
+                        if (it.hasSubscription() && it.subscription.status == ResultSubscriptionStatus.RESULT_SUBSCRIPTION_STATUS_OK) {
+                            logger.info("Успешная подписка на обновления ордеров")
+                            // создаём ордер, при успешном подключении к стриму
+                            runBlocking { ordersService.postOrderAsync(postOrderRequest) }
+                        }
+                    },
+                    {
+                        if (it.hasOrderState() && it.orderState.orderRequestId.equals(orderId) &&
+                            it.orderState.lotsLeft > 0) {
+                            logger.info("Ордер: $it")
+                            // отменяем созданный ордер
+                            val status = it.orderState.executionReportStatus
+                            if (status == OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_NEW ||
+                                status == OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_FILL ||
+                                status == OrderExecutionReportStatus.EXECUTION_REPORT_STATUS_PARTIALLYFILL) {
+                                logger.info("Отменяем ордер")
+                                runBlocking {
+                                    val response = ordersService.cancelOrder(
+                                        CancelOrderRequest.newBuilder()
+                                            .setAccountId(account.id) // id счета
+                                            .setOrderId(it.orderState.orderId) // id ордера для отмены
+                                            .build()
+                                    )
+                                    logger.info("Ответ: $response")
+                                }
+                            }
+                        }
+                    }
+                )
+            }
 
-        // отменяем ордер
-        ordersService.cancelOrder(
-            CancelOrderRequest.newBuilder()
-                .setAccountId(account.id) // id счета
-                .setOrderId(updatedOrderState.orderId) // id ордера для отмены
-                .build()
-        )
+            delay(3000)
+            ordersJob.cancel()
+        }
         channel.shutdown()
     }
 
@@ -251,7 +264,7 @@ class OrdersServiceAsyncExample {
         // отдаем из списка брокерский аккаунт
         return accountsResponse.accountsList
             .first { it.type.equals(AccountType.ACCOUNT_TYPE_TINKOFF) }
-            .also { logger.info("Аккаунт: $it")}
+            .also { logger.info("Аккаунт: $it") }
     }
 
     private suspend fun getLastPrice(marketService: MarketDataServiceAsync): LastPrice {

@@ -19,17 +19,17 @@ class OrdersServiceExampleTest {
         }
     }
 
-//    @Test
-//    @DisplayName("Async request to LimitOrder")
-//    fun testLimitOrderAsync() {
-//        Assertions.assertDoesNotThrow {
-//            runBlocking {
-//                async {
-//                    asyncExample.exampleLimitOrder()
-//                }.await()
-//            }
-//        }
-//    }
+    @Test
+    @DisplayName("Async request to LimitOrder")
+    fun testLimitOrderAsync() {
+        Assertions.assertDoesNotThrow {
+            runBlocking {
+                async {
+                    asyncExample.exampleLimitOrder()
+                }.await()
+            }
+        }
+    }
 
     @Test
     @DisplayName("Sync request to MarketOrder")
