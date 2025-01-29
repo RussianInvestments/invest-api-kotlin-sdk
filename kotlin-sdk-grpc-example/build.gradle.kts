@@ -22,6 +22,7 @@ tasks.withType<Test> {
     properties.load(project.file("local.properties").inputStream())
     systemProperty("token", properties.getProperty("token"))
     systemProperty("target", properties.getProperty("target"))
+    systemProperty("target-main", properties.getProperty("target-main"))
     systemProperty("instrumentIds", properties.getProperty("instrumentIds"))
 }
 
