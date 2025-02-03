@@ -27,8 +27,8 @@ gradlePlugin {
         register("helpersCodegen") {
             description = "Generates Grpc client helper classes with single manageable factory"
             displayName = "Kotlin SDK codegen plugin"
-            id = "ru.tinvest.piapi.helpers-codegen-plugin"
-            implementationClass = "ru.tinvest.piapi.generator.plugin.CodeGeneratorPlugin"
+            id = "ru.ttech.piapi.helpers-codegen-plugin"
+            implementationClass = "ru.ttech.piapi.generator.plugin.CodeGeneratorPlugin"
         }
     }
 }
