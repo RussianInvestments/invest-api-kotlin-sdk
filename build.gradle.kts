@@ -1,10 +1,13 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
 plugins {
-    kotlin("jvm") version "1.9.0" apply false
+    kotlin("jvm") version "1.9.20" apply false
     id("org.jetbrains.dokka") version "1.9.20"
+    id("com.vanniktech.maven.publish") version "0.30.0"
 }
 
-group = "ru.tinkoff.invest.piapi.kotlin"
-version = "1.24.0"
+group = "ru.t-technologies.invest.piapi.kotlin"
+version = "1.27.0"
 
 repositories {
     mavenCentral()
@@ -12,7 +15,7 @@ repositories {
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "maven-publish")
+    apply(plugin = "com.vanniktech.maven.publish")
     apply(plugin = "org.jetbrains.dokka")
 
     repositories {
@@ -43,5 +46,37 @@ subprojects {
 
     tasks.getByName<Test>("test") {
         useJUnitPlatform()
+    }
+
+    mavenPublishing {
+        publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
+        signAllPublications()
+
+        pom {
+            name.set(project.name)
+            description.set("Kotlin SDK contract for T-Invest API")
+            url.set("https://github.com/RussianInvestments/invest-api-kotlin-sdk")
+
+            licenses {
+                license {
+                    name.set("The Apache License, Version 2.0")
+                    url.set("https://github.com/RussianInvestments/invest-api-kotlin-sdk/blob/main/LICENSE")
+                }
+            }
+
+            developers {
+                developer {
+                    id.set("NemetsSY-TCS")
+                    name.set("Sergey Nemets")
+                }
+            }
+
+            scm {
+                connection.set("scm:git:git://github.com/RussianInvestments/invest-api-kotlin-sdk.git")
+                developerConnection.set("scm:git:ssh://github.com/RussianInvestments/invest-api-kotlin-sdk.git")
+                url.set("https://github.com/RussianInvestments/invest-api-kotlin-sdk")
+            }
+
+        }
     }
 }
