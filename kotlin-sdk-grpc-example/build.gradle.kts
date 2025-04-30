@@ -10,6 +10,8 @@ dependencies {
     implementation(project(mapOf("path" to ":kotlin-sdk-grpc-contract")))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.slf4j:slf4j-simple:2.0.7")
+    implementation("io.github.resilience4j:resilience4j-kotlin:1.7.0")
+    implementation("io.github.resilience4j:resilience4j-retry:1.7.0")
 }
 
 group = parent?.group!!

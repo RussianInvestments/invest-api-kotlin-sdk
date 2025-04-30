@@ -1,5 +1,8 @@
 package ru.ttech.piapi.example
 
+import io.github.resilience4j.kotlin.retry.RetryConfig
+import io.github.resilience4j.kotlin.retry.executeSuspendFunction
+import io.github.resilience4j.retry.Retry
 import io.grpc.ManagedChannel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -8,6 +11,7 @@ import ru.ttech.piapi.core.InvestApi
 import ru.ttech.piapi.core.OperationsServiceAsync
 import ru.ttech.piapi.core.utils.toBigDecimal
 import ru.ttech.piapi.core.utils.toTimestamp
+import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -18,10 +22,16 @@ class OperationsServiceAsyncExample {
         private val logger: Logger = LoggerFactory.getLogger(OperationsServiceAsyncExample::class.java)
 
         // начало периода
-        private val timeFrom = Instant.now().minus(1, ChronoUnit.DAYS).toTimestamp()
+        private val timeFrom = Instant.now().minus(7, ChronoUnit.DAYS).toTimestamp()
 
         // окончание периода
         private val timeTo = Instant.now().toTimestamp()
+
+        private val retry = Retry.of("GetReportRetry", RetryConfig {
+            maxAttempts(7)
+            waitDuration(Duration.ofSeconds(30))
+            retryOnException { true }
+        })
     }
 
     private fun createInvestApi(): Pair<InvestApi, ManagedChannel> {
@@ -55,18 +65,19 @@ class OperationsServiceAsyncExample {
             )
             if (response.hasGenerateBrokerReportResponse()) {
                 logger.info("Task id: ${response.generateBrokerReportResponse.taskId}")
+                val report = retry.executeSuspendFunction {
+                    operationsService.getBrokerReport(
+                        BrokerReportRequest.newBuilder()
+                            .setGetBrokerReportRequest(
+                                GetBrokerReportRequest.newBuilder()
+                                    .setTaskId(response.generateBrokerReportResponse.taskId) // идентификатор задачи формирования отчета
+                                    .setPage(0) // номер страницы отчета
+                                    .build()
+                            )
+                            .build()
+                    )
+                }
 
-                // Также можно запросить готовый отчет по его id
-                val report = operationsService.getBrokerReport(
-                    BrokerReportRequest.newBuilder()
-                        .setGetBrokerReportRequest(
-                            GetBrokerReportRequest.newBuilder()
-                                .setTaskId(response.generateBrokerReportResponse.taskId) // идентификатор задачи формирования отчета
-                                .setPage(0) // номер страницы отчета
-                                .build()
-                        )
-                        .build()
-                )
 
                 if (report.hasGetBrokerReportResponse()) {
                     logger.info(
@@ -217,17 +228,19 @@ class OperationsServiceAsyncExample {
         // Получаем список аккаунтов и берём первый из списка
         accounts.accountsList.take(1).forEach {
             // запрос на получение отчета «Справка о доходах за пределами РФ» по счету
-            val response = operationsService.getDividendsForeignIssuer(
-                GetDividendsForeignIssuerRequest.newBuilder()
-                    .setGenerateDivForeignIssuerReport(
-                        GenerateDividendsForeignIssuerReportRequest.newBuilder()
-                            .setAccountId(it.id)  // идентификатор счета клиента
-                            .setFrom(timeFrom) // начало периода
-                            .setTo(timeTo) // окончание периода
-                            .build()
-                    )
-                    .build()
-            )
+            val response = retry.executeSuspendFunction {
+                operationsService.getDividendsForeignIssuer(
+                    GetDividendsForeignIssuerRequest.newBuilder()
+                        .setGenerateDivForeignIssuerReport(
+                            GenerateDividendsForeignIssuerReportRequest.newBuilder()
+                                .setAccountId(it.id)  // идентификатор счета клиента
+                                .setFrom(timeFrom) // начало периода
+                                .setTo(timeTo) // окончание периода
+                                .build()
+                        )
+                        .build()
+                )
+            }
 
             if (response.hasGenerateDivForeignIssuerReportResponse()) {
                 logger.info("Task id: ${response.generateDivForeignIssuerReportResponse.taskId}")

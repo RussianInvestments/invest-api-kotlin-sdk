@@ -1,5 +1,7 @@
 package ru.ttech.piapi.example
 
+import io.github.resilience4j.kotlin.retry.RetryConfig
+import io.github.resilience4j.retry.Retry
 import io.grpc.ManagedChannel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -8,6 +10,7 @@ import ru.ttech.piapi.core.InvestApi
 import ru.ttech.piapi.core.OperationsServiceSync
 import ru.ttech.piapi.core.utils.toBigDecimal
 import ru.ttech.piapi.core.utils.toTimestamp
+import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -18,10 +21,16 @@ class OperationsServiceSyncExample {
         private val logger: Logger = LoggerFactory.getLogger(OperationsServiceSyncExample::class.java)
 
         // начало периода
-        private val timeFrom = Instant.now().minus(1, ChronoUnit.DAYS).toTimestamp()
+        private val timeFrom = Instant.now().minus(7, ChronoUnit.DAYS).toTimestamp()
 
         // окончание периода
         private val timeTo = Instant.now().toTimestamp()
+
+        private val retry = Retry.of("GetReportRetry", RetryConfig {
+            maxAttempts(7)
+            waitDuration(Duration.ofSeconds(30))
+            retryOnException { true }
+        })
     }
 
     private fun createInvestApi(): Pair<InvestApi, ManagedChannel> {
@@ -57,16 +66,18 @@ class OperationsServiceSyncExample {
                 logger.info("Task id: ${response.generateBrokerReportResponse.taskId}")
 
                 // Также можно запросить готовый отчет по его id
-                val report = operationsService.getBrokerReport(
-                    BrokerReportRequest.newBuilder()
-                        .setGetBrokerReportRequest(
-                            GetBrokerReportRequest.newBuilder()
-                                .setTaskId(response.generateBrokerReportResponse.taskId) // идентификатор задачи формирования отчета
-                                .setPage(0) // номер страницы отчета
-                                .build()
-                        )
-                        .build()
-                )
+                val report = retry.executeCallable {
+                    operationsService.getBrokerReport(
+                        BrokerReportRequest.newBuilder()
+                            .setGetBrokerReportRequest(
+                                GetBrokerReportRequest.newBuilder()
+                                    .setTaskId(response.generateBrokerReportResponse.taskId) // идентификатор задачи формирования отчета
+                                    .setPage(0) // номер страницы отчета
+                                    .build()
+                            )
+                            .build()
+                    )
+                }
 
                 if (report.hasGetBrokerReportResponse()) {
                     logger.info(
@@ -233,15 +244,17 @@ class OperationsServiceSyncExample {
                 logger.info("Task id: ${response.generateDivForeignIssuerReportResponse.taskId}")
 
                 // Также можно запросить готовый отчет по его id
-                val report = operationsService.getDividendsForeignIssuer(
-                    GetDividendsForeignIssuerRequest.newBuilder()
-                        .setGetDivForeignIssuerReport(
-                            GetDividendsForeignIssuerReportRequest.newBuilder()
-                                .setTaskId(response.generateDivForeignIssuerReportResponse.taskId) // идентификатор задачи на получение отчета по счету
-                                .build()
-                        )
-                        .build()
-                )
+                val report = retry.executeCallable {
+                    operationsService.getDividendsForeignIssuer(
+                        GetDividendsForeignIssuerRequest.newBuilder()
+                            .setGetDivForeignIssuerReport(
+                                GetDividendsForeignIssuerReportRequest.newBuilder()
+                                    .setTaskId(response.generateDivForeignIssuerReportResponse.taskId) // идентификатор задачи на получение отчета по счету
+                                    .build()
+                            )
+                            .build()
+                    )
+                }
 
                 if (report.hasDivForeignIssuerReport()) {
                     logger.info("Отчет содержит в себе ${response.divForeignIssuerReport.itemsCount} позиций")
