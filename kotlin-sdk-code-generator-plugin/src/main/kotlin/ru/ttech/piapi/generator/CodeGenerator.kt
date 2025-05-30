@@ -269,7 +269,7 @@ private fun generateCompanionObject(packageName: String): TypeSpec {
         ParameterSpec("token", String::class.asTypeName()),
         ParameterSpec.builder("appName", String::class).defaultValue("InvestApi.defaultAppName")
             .build(),
-        ParameterSpec("target", String::class.asTypeName())
+        ParameterSpec.builder("target", String::class).defaultValue("\"invest-public-api.tinkoff.ru:443\"").build()
     )
     return TypeSpec.companionObjectBuilder()
         .addProperty(
