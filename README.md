@@ -15,18 +15,18 @@
 
 Для начала работы подключите к вашему проекту core-модуль
 
-|     Система сборки     | Код                                                                                                                                                                                                                                                                                                                         |
-|:----------------------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|         Maven          | <b>\<dependency></b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>\<groupId></b>ru.tinkoff.piapi<b>\</groupId></b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>\<artifactId></b>kotlin-sdk-grpc-core<b>\</artifactId></b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>\<version></b>1.0<b>\</version></b><br><b>\</dependency></b> |
-| Gradle with Groovy DSL | <b>implementation</b> 'ru.tinkoff.piapi:kotlin-sdk-grpc-core:1.0'                                                                                                                                                                                                                                                           |
-| Gradle with Kotlin DSL | <b>implementation</b>("ru.tinkoff.piapi:kotlin-sdk-grpc-core:1.0")                                                                                                                                                                                                                                                          |
+|     Система сборки     | Код                                                                                                                                                                                                                                                                                                                                                 |
+|:----------------------:|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|         Maven          | <b>\<dependency></b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>\<groupId></b>ru.t-technologies.invest.piapi.kotlin<b>\</groupId></b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>\<artifactId></b>kotlin-sdk-grpc-core<b>\</artifactId></b><br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>\<version></b>1.35.0<b>\</version></b><br><b>\</dependency></b> |
+| Gradle with Groovy DSL | <b>implementation</b> 'ru.t-technologies.invest.piapi.kotlin:kotlin-sdk-grpc-core:1.35.0'                                                                                                                                                                                                                                                           |
+| Gradle with Kotlin DSL | <b>implementation</b>("ru.t-technologies.invest.piapi.kotlin:kotlin-sdk-grpc-core:1.35.0")                                                                                                                                                                                                                                                          |
 
 
 
 После этого можно пользоваться инструментарием
 
 ```kotlin
-import ru.tinkoff.piapi.core.InvestApi
+import ru.ttech.piapi.core.InvestApi
 
 var token = "<secret-token>"
 var api = InvestApi.createApi(InvestApi.defaultChannel(token = token, target = "invest-public-api.tinkoff.ru:443"))
