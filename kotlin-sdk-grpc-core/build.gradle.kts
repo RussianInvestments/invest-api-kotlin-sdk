@@ -9,7 +9,7 @@ plugins {
 dependencies {
     implementation(kotlin("reflect"))
     implementation("org.reflections:reflections:0.10.2")
-    implementation(project(":kotlin-sdk-grpc-contract"))
+    api(project(":kotlin-sdk-grpc-contract"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
     implementation("io.grpc:grpc-netty:1.65.0")
     implementation("io.netty:netty-codec-http:4.1.111.Final")
